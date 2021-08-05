@@ -1,25 +1,33 @@
 package ru.kiianov.foxminded.formulaone.provider;
 
 import org.junit.jupiter.api.Test;
-import ru.kiianov.foxminded.formulaone.domain.LapData;
 import ru.kiianov.foxminded.formulaone.domain.Racer;
-import ru.kiianov.foxminded.formulaone.parcer.AbbreviationParser;
-import ru.kiianov.foxminded.formulaone.parcer.LogParser;
+import ru.kiianov.foxminded.formulaone.parser.RaceLogParser;
+import ru.kiianov.foxminded.formulaone.parser.RaceParser;
+import ru.kiianov.foxminded.formulaone.reader.FileReader;
+import ru.kiianov.foxminded.formulaone.reader.StreamFileReader;
 
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ResultChartViewProviderTest {
-    private final ResultChartViewProvider viewProvider = new ResultChartViewProvider();
-    private final LogParser logParser = new LogParser();
-    private final AbbreviationParser abbreviationParser = new AbbreviationParser();
+class RaceResultChartViewProviderTest {
+    private final RaceResultChartViewProvider viewProvider = new RaceResultChartViewProvider();
+    private final FileReader reader = new StreamFileReader();
+    private final RaceParser parser = new RaceLogParser();
 
     @Test
     void provideViewShouldReturnCorrectView() {
-        final Map<String, LapData> raceLog = logParser.parse("start.log", "end.log");
-        final Map<String, Racer> racers = abbreviationParser.parse("abbreviations.txt");
-        final String expected = " 1. Sebastian Vettel    | FERRARI                       | 1:04:415  \n" +
+        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss.SSS");
+        final List<String> abbreviations = reader.read("src/test/resources/abbreviations.txt");
+        final List<String> starts = reader.read("src/test/resources/start.log");
+        final List<String> ends = reader.read("src/test/resources/end.log");
+
+        final List<Racer> racers = parser.parse(ends, starts, abbreviations);
+
+        final String expected =
+                " 1. Sebastian Vettel    | FERRARI                       | 1:04:415  \n" +
                 " 2. Daniel Ricciardo    | RED BULL RACING TAG HEUER     | 1:12:13   \n" +
                 " 3. Valtteri Bottas     | MERCEDES                      | 1:12:434  \n" +
                 " 4. Lewis Hamilton      | MERCEDES                      | 1:12:460  \n" +
@@ -40,6 +48,6 @@ class ResultChartViewProviderTest {
                 "18. Lance Stroll        | WILLIAMS MERCEDES             | 1:13:323  \n" +
                 "19. Kevin Magnussen     | HAAS FERRARI                  | 1:13:393  \n";
 
-        assertEquals(expected, viewProvider.provideView(raceLog, racers));
+        assertEquals(expected, viewProvider.provideView(racers));
     }
 }

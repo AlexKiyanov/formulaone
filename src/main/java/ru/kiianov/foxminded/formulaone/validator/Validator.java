@@ -1,79 +1,47 @@
 package ru.kiianov.foxminded.formulaone.validator;
 
 import ru.kiianov.foxminded.formulaone.exception.LogFileException;
-import ru.kiianov.foxminded.formulaone.provider.StreamFromFileProvider;
-import ru.kiianov.foxminded.formulaone.provider.StreamProvider;
+import ru.kiianov.foxminded.formulaone.reader.FileReader;
+import ru.kiianov.foxminded.formulaone.reader.StreamFileReader;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
+public class Validator implements FileValidator {
 
-public class Validator {
-    public void validate(String abbreviationFileName, String startLogFileName, String endLogFileName) {
+    @Override
+    public void validate(String abbreviationFilePath, String startLogFilePath, String endLogFilePath) {
+        final File abbreviation = getPath(abbreviationFilePath).toFile();
+        final File startLog = getPath(startLogFilePath).toFile();
+        final File endLog = getPath(endLogFilePath).toFile();
 
-        final File abbreviation = getPath(abbreviationFileName).toFile();
-        if (!abbreviation.exists()) {
-            throw new IllegalArgumentException("abbreviations file was not found. Please check path.");
+        if (!abbreviation.exists() ||
+                !startLog.exists() ||
+                !endLog.exists()) {
+            throw new IllegalArgumentException("file was not found. Please check path.");
         }
 
-        if (isContainsDuplicates(abbreviationFileName)) {
-            throw new LogFileException("abbreviations contains duplicates!");
-        }
-
-        final File startLog = getPath(startLogFileName).toFile();
-        if (!startLog.exists()) {
-            throw new IllegalArgumentException("start.log file was not found. Please check path.");
-        }
-
-        if (isContainsDuplicates(startLogFileName)) {
-            throw new LogFileException("start.log contains duplicates!");
-        }
-
-        final File endLog = getPath(endLogFileName).toFile();
-        if (!endLog.exists()) {
-            throw new IllegalArgumentException("end.log file was not found. Please check path.");
-        }
-
-        if (isContainsDuplicates(endLogFileName)) {
-            throw new LogFileException("end.log contains duplicates!");
+        if (isContainsDuplicates(abbreviationFilePath) ||
+                isContainsDuplicates(startLogFilePath) ||
+                isContainsDuplicates(endLogFilePath)) {
+            throw new LogFileException("log contains duplicates!");
         }
     }
 
     private Path getPath(String fileName) {
-        Path abbreviationFileName;
-        try {
-            if (!fileName.contains("/")) {
-                abbreviationFileName = Paths.get(
-                        requireNonNull(Thread.currentThread()
-                                .getContextClassLoader()
-                                .getResource(fileName))
-                                .toURI());
-            } else {
-                abbreviationFileName = Path.of(fileName);
-            }
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Bad filename to URI conversion.", e);
-        }
-        return abbreviationFileName;
+        return Path.of(fileName);
     }
 
     private boolean isContainsDuplicates(String logName) {
-        final StreamProvider streamProvider = new StreamFromFileProvider();
+        final FileReader reader = new StreamFileReader();
 
-        final List<String> abbreviationsFromLog = streamProvider
-                .provideStream(logName)
-                .map(line -> line.substring(3))
-                .collect(Collectors.toList());
+        final List<String> linesFromLog = reader.read(logName);
 
-        final Set<String> abbreviationsWithoutDuplicates = new HashSet<>(abbreviationsFromLog);
+        final Set<String> linesWithoutDuplications = new HashSet<>(linesFromLog);
 
-        return abbreviationsWithoutDuplicates.size() < abbreviationsFromLog.size();
+        return linesWithoutDuplications.size() < linesFromLog.size();
     }
 }

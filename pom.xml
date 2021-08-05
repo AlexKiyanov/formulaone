@@ -11,11 +11,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <junit.version>5.7.0</junit.version>
+        <junit.version>5.7.2</junit.version>
         <jacoco.version>0.8.7</jacoco.version>
         <minimal-test-cover>0.90</minimal-test-cover>
         <mockito.version>3.11.2</mockito.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -42,6 +43,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -95,9 +97,6 @@
                         <exclude>
                             ru/kiianov/foxminded/formulaone/domain/Racer.class
                         </exclude>
-                        <exclude>
-                            ru/kiianov/foxminded/formulaone/domain/LapData.class
-                        </exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -121,7 +120,7 @@
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>BUNDLE</element>
+                                    <element>PACKAGE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>

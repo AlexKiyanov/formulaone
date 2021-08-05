@@ -1,8 +1,8 @@
 package ru.kiianov.foxminded.formulaone;
 
-import ru.kiianov.foxminded.formulaone.parcer.AbbreviationParser;
-import ru.kiianov.foxminded.formulaone.parcer.LogParser;
-import ru.kiianov.foxminded.formulaone.provider.ResultChartViewProvider;
+import ru.kiianov.foxminded.formulaone.parser.RaceLogParser;
+import ru.kiianov.foxminded.formulaone.provider.RaceResultChartViewProvider;
+import ru.kiianov.foxminded.formulaone.reader.StreamFileReader;
 import ru.kiianov.foxminded.formulaone.validator.Validator;
 
 import java.util.Scanner;
@@ -10,10 +10,10 @@ import java.util.Scanner;
 public class F1ResultChartApplication {
     public static void main(String[] args) {
         final ResultChartGenerator resultChartGenerator = new ResultChartGenerator(
-                new AbbreviationParser(),
-                new LogParser(),
-                new ResultChartViewProvider(),
-                new Validator());
+                new Validator(),
+                new StreamFileReader(),
+                new RaceLogParser(),
+                new RaceResultChartViewProvider());
 
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.println("Input abbreviations absolute file path:");
